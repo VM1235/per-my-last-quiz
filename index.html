@@ -83,6 +83,7 @@ button:disabled{opacity:.4;cursor:default}
 .six .note{gap:6px;padding:20px 22px;min-width:0}
 .six .note:nth-child(even){transform:rotate(1deg)}
 .six .note h2{color:var(--on-note)}
+.six .note .num{justify-self:start;font-family:var(--f-mono);font-size:1.1rem;font-weight:500;width:2rem;height:2rem;display:grid;place-items:center;border-radius:99px;background:var(--on-note);color:var(--note)}
 .six .note .pw{font-size:.95rem;margin-top:4px}
 .six .ph{border:2px dashed var(--line);border-radius:3px;display:grid;place-items:center;min-height:150px;font-family:var(--f-display);font-weight:900;font-size:3rem;color:var(--muted)}
 .ask{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
@@ -231,8 +232,8 @@ function hostRender(){
     app.innerHTML=`${brand(done?"Poll time":`Reveal ${shown} of ${n}`)}
     <h1>${done?"Which one are you? Vote in the poll.":"What you could have been"}</h1>
     <div class="six">${ORDER.map((k,i)=>i<shown
-      ?`<div class="note ${i===shown-1&&!done?"new":""}"><h2>${esc(R[k].name)}</h2><b>${esc(R[k].tag)}</b><span class="pw">Superpower: ${esc(R[k].power)}</span></div>`
-      :`<div class="ph">?</div>`).join("")}</div>
+      ?`<div class="note ${i===shown-1&&!done?"new":""}"><span class="num">${i+1}</span><h2>${esc(R[k].name)}</h2><b>${esc(R[k].tag)}</b><span class="pw">Superpower: ${esc(R[k].power)}</span></div>`
+      :`<div class="ph">${i+1}</div>`).join("")}</div>
     <div class="ask"><button class="ghost" id="bk">Back</button>${done?"":`<button id="nx">${shown<n?"Reveal next":"Done"}</button>`}</div>`;
     if(!done)$("#nx").onclick=()=>{hs++;hostRender()};
     $("#bk").onclick=()=>{hs--;hostRender()};
