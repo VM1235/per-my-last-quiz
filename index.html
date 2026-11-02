@@ -116,30 +116,21 @@ const R={
 };
 const ORDER=["pml","cb","syn","off","qw","box"];
 const Q=[
- {re:"Quick sync (15 min)",q:"A meeting invite arrives: \"Quick sync, 15 minutes.\" There's no agenda. You:",a:{
-  pml:"Reply asking what it's about before accepting",cb:"Accept, then ask if it can move to next week",syn:"Accept and add two people who should probably be there",
-  off:"Message the organiser to ask what's going on",qw:"Accept, and hope it really is 15 minutes",box:"Accept and bring a few ideas, just in case"}},
- {re:"Chat message",q:"A colleague messages you: \"Got a minute?\" You reply:",a:{
-  pml:"\"Sure, what's it about?\"",cb:"\"In a meeting, can we talk after lunch?\"",syn:"\"Always! Want me to loop in anyone else?\"",
-  off:"\"Let's just jump on a call.\"",qw:"\"Yes, send it over.\" Sorted in two messages.",box:"\"Is this about the new idea? Tell me everything.\""}},
- {re:"Camera etiquette",q:"Your camera is off in a team meeting. Why?",a:{
-  pml:"The invite didn't mention video",cb:"I'll turn it on once I've settled in",syn:"It isn't. My camera is always on.",
-  off:"I'll turn it on when I need to speak",qw:"I'm clearing emails while I listen",box:"I'm walking. I think better on the move."}},
- {re:"Inbox status",q:"Your inbox right now looks like:",a:{
-  pml:"Neat folders, with a rule for everything",cb:"2,317 unread. They can wait.",syn:"Lots of threads I'm cc'd on, and I read them all",
-  off:"Not much, because I'd rather talk than email",qw:"Inbox zero, every single day",box:"Newsletters and articles I saved for inspiration"}},
- {re:"Deadline update",q:"A deadline has just been moved up by a week. Your first move:",a:{
-  pml:"Find the email where the original date was agreed",cb:"Ask if we can discuss the new timeline next week",syn:"Set up a call with everyone involved",
-  off:"Have a quiet word with your manager to understand why",qw:"Cut what isn't essential and get started",box:"Suggest a completely different way to do the project"}},
- {re:"Friday, 4:45 pm",q:"It's Friday at 4:45 pm. You are:",a:{
-  pml:"Sending a tidy summary of everything that happened this week",cb:"Moving three tasks to Monday",syn:"Organising drinks for the whole team",
-  off:"Having a quiet catch-up with your favourite colleague",qw:"Already logged off. You finished at 3.",box:"Starting a brand-new project nobody asked for"}},
- {re:"Annual review",q:"Your manager asks, \"Any feedback for me?\" You say:",a:{
-  pml:"\"I've written down a few points. Shall I share them?\"",cb:"\"Let me think about it and get back to you.\"",syn:"\"Honestly you're doing great. We're all doing great.\"",
-  off:"\"Could we grab a coffee and talk about it?\"",qw:"Three clear points, delivered in 40 seconds",box:"\"What if we tried a completely different way of working?\""}},
- {re:"This meeting is overrunning",q:"The meeting is 10 minutes over. You say:",a:{
-  pml:"\"I do have a hard stop at four.\" (It is 4:01.)",cb:"\"Let's park this and circle back.\"",syn:"\"Great discussion, everyone!\"",
-  off:"\"Shall a few of us pick this up separately?\"",qw:"\"So what's the next step, and who owns it?\"",box:"\"Wait, before we go, one more idea...\""}}
+ {re:"Snack order",q:"Pick a snack for a long meeting:",a:{
+  pml:"Neatly cut fruit",cb:"Biscuits, saved for later",syn:"Samosas for everyone",
+  off:"A quiet cup of tea",qw:"A banana",box:"Something I've never tried"}},
+ {re:"Desk setup",q:"Pick one thing for your desk:",a:{
+  pml:"Labelled folders",cb:"A comfy cushion",syn:"A team photo",
+  off:"Good headphones",qw:"A big clock",box:"A whiteboard"}},
+ {re:"Weekend plans",q:"Pick a Saturday:",a:{
+  pml:"A planned day out",cb:"Nothing planned at all",syn:"A big family lunch",
+  off:"Coffee with one close friend",qw:"Fixing things around the house",box:"Trying a new hobby"}},
+ {re:"Leave request",q:"Pick a holiday:",a:{
+  pml:"A fully planned tour",cb:"A slow week on a beach",syn:"A group trip with friends",
+  off:"A quiet cabin in the hills",qw:"A quick city break",box:"Somewhere I've never heard of"}},
+ {re:"Skills assessment",q:"Pick a superpower:",a:{
+  pml:"A perfect memory",cb:"Pausing time",syn:"Speaking every language",
+  off:"Reading minds",qw:"Super speed",box:"Seeing the future"}}
 ];
 const SECS=40;
 const $=s=>document.querySelector(s);
@@ -159,8 +150,8 @@ function home(){
   <div class="memo">
   <div class="memo-body">
     <h1>Which corporate phrase are you?</h1>
-    <p class="lede">Eight questions about meetings, emails and Friday afternoons. You get ${SECS} seconds for each one, so go with your gut. At the end, you find out which phrase you really are.</p>
-    <div class="row"><button id="begin">Start the quiz</button><span class="small">About 5 minutes</span></div>
+    <p class="lede">Five quick picks. No right or wrong answers. You get ${SECS} seconds for each one, so go with your gut. At the end, you find out which phrase you really are.</p>
+    <div class="row"><button id="begin">Start the quiz</button><span class="small">About 3 minutes</span></div>
   </div></div>`;
   $("#begin").onclick=()=>{qi=0;picks=[];orders=Q.map(()=>shuffle(ORDER));question()};
 }
@@ -223,9 +214,9 @@ function hostRender(){
     <div class="memo"><div class="memo-body">
       <h1>Which corporate phrase are you?</h1>
       <p class="lede">Open the link in the chat on your phone or laptop. There are ${Q.length} questions and you get ${SECS} seconds for each. Remember your result, then come back to Zoom.</p>
-      <div class="clock" id="clk">6:00</div>
-      <div class="row"><button id="t">Start 6-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>    </div></div>`;
-    $("#t").onclick=()=>{let s=360;$("#t").disabled=true;timer=setInterval(()=>{s--;$("#clk").textContent=`${s/60|0}:${String(s%60).padStart(2,"0")}`;if(s<=0){stop();$("#clk").textContent="Time!"}},1000)};
+      <div class="clock" id="clk">4:00</div>
+      <div class="row"><button id="t">Start 4-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>    </div></div>`;
+    $("#t").onclick=()=>{let s=240;$("#t").disabled=true;timer=setInterval(()=>{s--;$("#clk").textContent=`${s/60|0}:${String(s%60).padStart(2,"0")}`;if(s<=0){stop();$("#clk").textContent="Time!"}},1000)};
     $("#nx").onclick=()=>{hs=1;hostRender()};
   }else{
     const done=hs>n;
