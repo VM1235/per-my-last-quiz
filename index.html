@@ -9,7 +9,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500;62..125,800;62..125,900&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: an office-email parody. Each question is a memo (RE: / FROM: header), answers are reply options,
+/* Layout: an office-email parody. Each question is a memo (RE: header), answers are reply options,
    results are a sticky note on an HR card. Host screen (#host) runs the raise-your-hand reveal. */
 :root{
   --bg:#eaeef4;         /* open-plan grey-blue */
@@ -21,14 +21,15 @@
   --on-accent:#ffffff;
   --note:#ffd84d;       /* sticky note */
   --on-note:#2a2205;
+  --urgent:#d9482b;
   --f-display:"Archivo","Arial Narrow","Helvetica Neue",sans-serif;
   --f-body:"Instrument Sans",system-ui,-apple-system,sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#10141d;--surface:#1a2030;--ink:#e8ecf3;--muted:#98a2b6;--line:#2c3447;--accent:#7d9bff;--on-accent:#0d1426;--note:#f2c94c;--on-note:#241c02;color-scheme:dark}}
+  --bg:#10141d;--surface:#1a2030;--ink:#e8ecf3;--muted:#98a2b6;--line:#2c3447;--accent:#7d9bff;--on-accent:#0d1426;--note:#f2c94c;--on-note:#241c02;--urgent:#ff7a5c;color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#10141d;--surface:#1a2030;--ink:#e8ecf3;--muted:#98a2b6;--line:#2c3447;--accent:#7d9bff;--on-accent:#0d1426;--note:#f2c94c;--on-note:#241c02;color-scheme:dark}
+  --bg:#10141d;--surface:#1a2030;--ink:#e8ecf3;--muted:#98a2b6;--line:#2c3447;--accent:#7d9bff;--on-accent:#0d1426;--note:#f2c94c;--on-note:#241c02;--urgent:#ff7a5c;color-scheme:dark}
 *{box-sizing:border-box}
 body{
   background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
@@ -42,7 +43,7 @@ body{
 .logo{font-family:var(--f-display);font-weight:900;font-stretch:75%;font-size:1.15rem;letter-spacing:.02em;text-transform:uppercase}
 .logo span{color:var(--accent)}
 .mono{font-family:var(--f-mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-h1,.h1{font-family:var(--f-display);font-weight:900;font-stretch:80%;font-size:clamp(2.2rem,7vw,4rem);line-height:.98;letter-spacing:-.01em;margin:0;text-wrap:balance}
+h1{font-family:var(--f-display);font-weight:900;font-stretch:80%;font-size:clamp(2.2rem,7vw,4rem);line-height:.98;letter-spacing:-.01em;margin:0;text-wrap:balance}
 h2{font-family:var(--f-display);font-weight:800;font-stretch:90%;font-size:clamp(1.4rem,3.6vw,2rem);line-height:1.1;margin:0;text-wrap:balance}
 p{margin:0}
 .lede{color:var(--muted);font-size:1.1rem;max-width:58ch}
@@ -53,17 +54,20 @@ p{margin:0}
 button{font:inherit;cursor:pointer;border-radius:6px;padding:12px 20px;font-weight:700;border:1.5px solid transparent;background:var(--accent);color:var(--on-accent)}
 button.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
 button:hover{filter:brightness(1.06)}
-button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--note);outline-offset:2px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--note);outline-offset:2px}
 button:disabled{opacity:.4;cursor:default}
 .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .opts{display:grid;gap:10px}
 .opt{display:flex;gap:14px;align-items:flex-start;text-align:left;width:100%;background:var(--surface);color:var(--ink);border:1.5px solid var(--line);font-weight:500;padding:14px 16px}
 .opt:hover{border-color:var(--accent);filter:none}
-div.opt{border-radius:6px;font-size:1.05rem}
 .opt .k{font-family:var(--f-mono);font-size:.8rem;color:var(--muted);padding-top:2px;flex:none}
-.opt.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
-.progress{height:6px;background:var(--line);border-radius:99px;overflow:hidden}
-.progress i{display:block;height:100%;background:var(--accent);transition:width .3s}
+/* answer timer */
+.timer{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.timer .track{height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.timer .track i{display:block;height:100%;width:100%;background:var(--accent);border-radius:99px;transform-origin:left;transition:transform 1s linear}
+.timer .secs{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:1.1rem;min-width:3ch;text-align:right}
+.timer.low .track i{background:var(--urgent)}
+.timer.low .secs{color:var(--urgent)}
 /* result: sticky note */
 .note{background:var(--note);color:var(--on-note);padding:clamp(22px,4vw,34px);border-radius:3px;transform:rotate(-1.2deg);box-shadow:0 10px 24px -14px rgba(0,0,0,.45);display:grid;gap:10px}
 .note .mono{color:var(--on-note);opacity:.75}
@@ -72,9 +76,7 @@ div.opt{border-radius:6px;font-size:1.05rem}
 .fact{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:14px 16px;min-width:0}
 .fact .mono{display:block;margin-bottom:4px}
 .chat{background:var(--surface);border:1.5px dashed var(--accent);border-radius:6px;padding:14px 16px;display:grid;gap:6px}
-.chat code{font-family:var(--f-mono);font-size:1rem;color:var(--ink);overflow-wrap:anywhere}
 .small{font-size:.9rem;color:var(--muted)}
-a{color:var(--accent)}
 /* host */
 .clock{font-family:var(--f-mono);font-size:clamp(3rem,12vw,6.5rem);line-height:1;font-variant-numeric:tabular-nums;color:var(--accent)}
 .count{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -97,155 +99,152 @@ a{color:var(--accent)}
 const R={
  pml:{name:"Per My Last Email",tag:"The polite assassin",
   desc:"You keep receipts. Every thread, every decision, every 'as discussed'. You are never rude, and somehow that is scarier. Projects finish on time because people are a little afraid of you.",
-  power:"Finding the exact email from March 2022",kryp:"People who reply without reading",habitat:"A meeting with a clear agenda",chat:"I'm a Per My Last Email"},
+  power:"Finding the exact email from March 2022",kryp:"People who reply without reading",habitat:"A meeting with a clear agenda"},
  cb:{name:"Let's Circle Back",tag:"The diplomat of later",
   desc:"No problem is too urgent to be discussed next week. You keep the peace, nobody ever feels rushed, and your to-do list has its own to-do list.",
-  power:"Ending any argument in four words",kryp:"The word 'today'",habitat:"Next Tuesday, probably",chat:"I'm a Let's Circle Back"},
+  power:"Ending any argument in four words",kryp:"The word 'today'",habitat:"Next Tuesday, probably"},
  syn:{name:"Synergy",tag:"The human group chat",
   desc:"You know everyone, from the CEO to the person who refills the printer. You cc people out of love. Every project you touch gets bigger and somehow more fun.",
-  power:"Turning strangers into a working group",kryp:"Being left off an invite",habitat:"A kick-off with 30 attendees",chat:"I'm a Synergy"},
+  power:"Turning strangers into a working group",kryp:"Being left off an invite",habitat:"A kick-off with 30 attendees"},
  off:{name:"Let's Take This Offline",tag:"The calm fixer",
   desc:"When the meeting gets tense, you quietly move it to a one-to-one and sort it out over coffee. Half the company's problems were solved by you and nobody knows.",
-  power:"Defusing drama before it reaches Slack",kryp:"Reply-all",habitat:"A quiet corner of the kitchen",chat:"I'm a Let's Take This Offline"},
+  power:"Defusing drama before it reaches the group chat",kryp:"Reply-all",habitat:"A quiet corner of the office"},
  qw:{name:"Quick Win",tag:"The one who actually does it",
   desc:"While everyone is still discussing, you have already done it. You love a checklist, you hate a slide deck, and your favourite meeting is the cancelled one.",
-  power:"Shipping it before the follow-up meeting",kryp:"Meetings about meetings",habitat:"A 15-minute sync that ends in 9",chat:"I'm a Quick Win"},
+  power:"Getting it done before the follow-up meeting",kryp:"Meetings about meetings",habitat:"A 15-minute sync that ends in 9"},
  box:{name:"Thinking Outside the Box",tag:"The whiteboard visionary",
   desc:"You have a wild idea, and then another one, usually at 4:58 on a Friday. Some of them are brilliant. You need a Quick Win next to you, and you know it.",
-  power:"Asking 'what if?' at exactly the right moment",kryp:"The phrase 'that's how we've always done it'",habitat:"A brainstorm with too many sticky notes",chat:"I'm a Thinking Outside the Box"}
+  power:"Asking 'what if?' at exactly the right moment",kryp:"The phrase 'that's how we've always done it'",habitat:"A brainstorm with too many sticky notes"}
 };
 const ORDER=["pml","cb","syn","off","qw","box"];
 const Q=[
- {re:"Quick sync (15 min)",q:"A meeting invite arrives: \"Quick sync, 15 minutes.\" No agenda. You:",a:{
-  pml:"Reply asking for the agenda, politely",cb:"Accept, then suggest moving it to next week",syn:"Forward it to four people who 'should be in the loop'",
-  off:"Message the organiser: 'Can we just chat one-to-one?'",qw:"Solve the issue by email so the meeting gets cancelled",box:"Turn up with a 40-slide vision deck"}},
- {re:"Camera etiquette",q:"Your camera is off because:",a:{
-  pml:"The invite said audio only. I checked.",cb:"I'll turn it on next meeting, promise",syn:"It's on. It's always on. I'm nodding at everyone.",
-  off:"I'm eating, and that is between me and my kitchen",qw:"I'm doing two other things at the same time",box:"I'm testing a new virtual background. It's a volcano."}},
- {re:"URGENT: technical difficulties",q:"Your laptop dies two minutes before your big presentation. You:",a:{
-  pml:"Calmly point out that the deck was attached to the invite",cb:"Ask if we can move it to next week",syn:"Get a colleague to share their screen and co-present with you",
-  off:"Quietly message the organiser and sort it out",qw:"Present from your phone. Who needs slides?",box:"Draw the whole thing on paper and hold it up to the camera"}},
- {re:"Out of office",q:"Your out-of-office message says:",a:{
-  pml:"\"As noted in my calendar, I am away until the 14th.\"",cb:"\"I will respond when I return. Eventually.\"",syn:"\"Please contact any of these nine wonderful colleagues.\"",
-  off:"\"Back Monday. Call only if the building is on fire.\"",qw:"You don't set one. You'll reply from the beach.",box:"A haiku"}},
+ {re:"Quick sync (15 min)",q:"A meeting invite arrives: \"Quick sync, 15 minutes.\" There's no agenda. You:",a:{
+  pml:"Reply asking what it's about before accepting",cb:"Accept, then ask if it can move to next week",syn:"Accept and add two people who should probably be there",
+  off:"Message the organiser to ask what's going on",qw:"Accept, and hope it really is 15 minutes",box:"Accept and bring a few ideas, just in case"}},
+ {re:"Chat message",q:"A colleague messages you: \"Got a minute?\" You reply:",a:{
+  pml:"\"Sure, what's it about?\"",cb:"\"In a meeting, can we talk after lunch?\"",syn:"\"Always! Want me to loop in anyone else?\"",
+  off:"\"Let's just jump on a call.\"",qw:"\"Yes, send it over.\" Sorted in two messages.",box:"\"Is this about the new idea? Tell me everything.\""}},
+ {re:"Camera etiquette",q:"Your camera is off in a team meeting. Why?",a:{
+  pml:"The invite didn't mention video",cb:"I'll turn it on in a minute. (You won't.)",syn:"It isn't. My camera is always on.",
+  off:"I'll turn it on when I need to speak",qw:"I'm clearing emails while I listen",box:"I'm walking. I think better on the move."}},
+ {re:"Inbox status",q:"Your inbox right now looks like:",a:{
+  pml:"Neat folders, with a rule for everything",cb:"2,317 unread. They can wait.",syn:"Lots of threads I'm cc'd on, and I read them all",
+  off:"Not much, because I'd rather talk than email",qw:"Inbox zero, every single day",box:"Newsletters and articles I saved for inspiration"}},
+ {re:"Deadline update",q:"A deadline has just been moved up by a week. Your first move:",a:{
+  pml:"Find the email where the original date was agreed",cb:"Ask if we can discuss the new timeline next week",syn:"Set up a call with everyone involved",
+  off:"Have a quiet word with your manager to understand why",qw:"Cut what isn't essential and get started",box:"Suggest a completely different way to do the project"}},
  {re:"Friday, 4:45 pm",q:"It's Friday at 4:45 pm. You are:",a:{
-  pml:"Sending a tidy summary of everything that happened this week",cb:"Moving three tasks to Monday",syn:"Organising drinks for the whole floor",
+  pml:"Sending a tidy summary of everything that happened this week",cb:"Moving three tasks to Monday",syn:"Organising drinks for the whole team",
   off:"Having a quiet catch-up with your favourite colleague",qw:"Already logged off. You finished at 3.",box:"Starting a brand-new project nobody asked for"}},
- {re:"Stationery audit",q:"Pick your spirit office supply:",a:{
-  pml:"A highlighter",cb:"A sticky note stuck on another sticky note",syn:"An extension cord",
-  off:"Noise-cancelling headphones",qw:"A stapler",box:"A whiteboard marker that is almost dry"}},
  {re:"Annual review",q:"Your manager asks, \"Any feedback for me?\" You say:",a:{
-  pml:"\"I've documented a few points. Shall I share the doc?\"",cb:"\"Let me think about it and get back to you.\"",syn:"\"Honestly you're doing great. We're all doing great.\"",
-  off:"\"Could we grab a coffee and talk about it?\"",qw:"Three bullet points, delivered in 40 seconds",box:"\"What if we got rid of annual reviews altogether?\""}},
+  pml:"\"I've written down a few points. Shall I share them?\"",cb:"\"Let me think about it and get back to you.\"",syn:"\"Honestly you're doing great. We're all doing great.\"",
+  off:"\"Could we grab a coffee and talk about it?\"",qw:"Three clear points, delivered in 40 seconds",box:"\"What if we tried a completely different way of working?\""}},
  {re:"This meeting is overrunning",q:"The meeting is 10 minutes over. You say:",a:{
   pml:"\"I do have a hard stop at four.\" (It is 4:01.)",cb:"\"Let's park this and circle back.\"",syn:"\"Great discussion, everyone!\"",
-  off:"\"Shall a few of us pick this up separately?\"",qw:"\"So what's the next step, and who owns it?\"",box:"\"Wait, before we go, one wild idea...\""}}
+  off:"\"Shall a few of us pick this up separately?\"",qw:"\"So what's the next step, and who owns it?\"",box:"\"Wait, before we go, one more idea...\""}}
 ];
+const SECS=15;
 const $=s=>document.querySelector(s);
 const app=$("#app");
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const brand=extra=>`<div class="brand"><div class="logo">Per My Last <span>Quiz</span></div><div class="mono">${extra||"Internal · do not forward"}</div></div>`;
+let timer=null;
+const stop=()=>{clearInterval(timer);timer=null};
 
 /* ---------- player ---------- */
 let qi=0,picks=[],orders=[];
 function home(){
+  stop();
   app.className="wrap";
   app.innerHTML=`${brand()}
   <div class="memo"><div class="memo-head"><div>FROM: <b>Human Resources (not really)</b></div><div>TO: <b>Everyone on this call</b></div><div>RE: <b>Which corporate phrase are you?</b></div></div>
   <div class="memo-body">
     <h1>Which corporate phrase are you?</h1>
-    <p class="lede">Eight questions about meetings, emails and Friday afternoons. Answer honestly. Nobody from HR is watching. At the end, you find out which phrase you really are.</p>
-    <div class="row"><button id="hostlink">Present it on a call</button><button class="ghost" id="begin">Take it on this device</button></div>
+    <p class="lede">Eight questions about meetings, emails and Friday afternoons. You get ${SECS} seconds for each one, so go with your gut. At the end, you find out which phrase you really are.</p>
+    <div class="row"><button id="begin">Start the quiz</button><span class="small">About 2 minutes</span></div>
   </div></div>`;
   $("#begin").onclick=()=>{qi=0;picks=[];orders=Q.map(()=>shuffle(ORDER));question()};
-  $("#hostlink").onclick=host;
 }
 function question(){
+  stop();
   const q=Q[qi],letters="ABCDEF";
   app.className="wrap";
   app.innerHTML=`${brand(`Question ${qi+1} of ${Q.length}`)}
-  <div class="progress"><i style="width:${qi/Q.length*100}%"></i></div>
+  <div class="timer" id="tm"><div class="track"><i id="tb"></i></div><span class="secs" id="ts">${SECS}</span></div>
   <div class="memo"><div class="memo-head"><div>RE: <b>${esc(q.re)}</b></div></div>
   <div class="memo-body">
     <h2>${esc(q.q)}</h2>
-    <div class="opts">${orders[qi].map((k,i)=>`<button class="opt ${picks[qi]===k?"sel":""}" data-k="${k}"><span class="k">${letters[i]}</span><span>${esc(q.a[k])}</span></button>`).join("")}</div>
-    ${qi>0?`<div class="row"><button class="ghost" id="back">Back</button></div>`:""}
+    <div class="opts">${orders[qi].map((k,i)=>`<button class="opt" data-k="${k}"><span class="k">${letters[i]}</span><span>${esc(q.a[k])}</span></button>`).join("")}</div>
   </div></div>`;
-  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{picks[qi]=b.dataset.k;qi++;qi<Q.length?question():result()});
-  if(qi>0)$("#back").onclick=()=>{qi--;question()};
+  const next=k=>{stop();picks[qi]=k;qi++;qi<Q.length?question():result()};
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>next(b.dataset.k));
+  let left=SECS;
+  requestAnimationFrame(()=>{$("#tb").style.transform=`scaleX(${(left-1)/SECS})`});
+  timer=setInterval(()=>{
+    left--;
+    $("#ts").textContent=left;
+    $("#tb").style.transform=`scaleX(${Math.max(0,left-1)/SECS})`;
+    $("#tm").classList.toggle("low",left<=5);
+    if(left<=0)next(null);
+  },1000);
   window.scrollTo(0,0);
 }
 function score(p){
-  const c={};ORDER.forEach(k=>c[k]=0);p.forEach(k=>c[k]++);
+  const c={};ORDER.forEach(k=>c[k]=0);
+  const given=p.filter(Boolean);
+  if(!given.length)return null;
+  given.forEach(k=>c[k]++);
   const max=Math.max(...Object.values(c));
   // tie: the tied phrase picked most recently wins
-  for(let i=p.length-1;i>=0;i--)if(c[p[i]]===max)return p[i];
+  for(let i=p.length-1;i>=0;i--)if(p[i]&&c[p[i]]===max)return p[i];
 }
 function result(){
-  const k=score(picks),r=R[k];
+  stop();
+  let k=score(picks),extra="";
+  const missed=picks.filter(x=>!x).length;
+  if(!k){k="cb";extra=`<p class="small">You didn't answer a single question in time. That tells us everything we need to know.</p>`}
+  else if(missed)extra=`<p class="small">You ran out of time on ${missed} question${missed>1?"s":""}. We've noted it for your review.</p>`;
+  const r=R[k];
   app.className="wrap";
   app.innerHTML=`${brand("Your result")}
   <div class="note"><span class="mono">Your corporate phrase is</span><h1>${esc(r.name)}</h1><p style="font-weight:700;font-size:1.15rem">${esc(r.tag)}</p></div>
   <p style="font-size:1.1rem;max-width:62ch">${esc(r.desc)}</p>
+  ${extra}
   <div class="facts">
     <div class="fact"><span class="mono">Superpower</span>${esc(r.power)}</div>
     <div class="fact"><span class="mono">Kryptonite</span>${esc(r.kryp)}</div>
     <div class="fact"><span class="mono">Natural habitat</span>${esc(r.habitat)}</div>
   </div>
-  <div class="chat"><span class="mono">Now go back to Zoom</span><p>Keep this screen handy. When the host calls out <b>${esc(r.name)}</b>, raise your hand. You can also type this in the chat:</p><code>${esc(r.chat)}</code></div>
-  <div class="row"><button class="ghost" id="again">Take it again</button></div>`;
-  $("#again").onclick=home;
+  <div class="chat"><span class="mono">Now go back to Zoom</span><p>Remember your phrase. When the host calls out <b>${esc(r.name)}</b>, raise your hand.</p></div>`;
   window.scrollTo(0,0);
 }
 
 /* ---------- host ---------- */
-let hs=0,counts={},timer=null;
+let hs=0,counts={};
 function host(){hs=0;counts={};ORDER.forEach(k=>counts[k]="");hostRender()}
 function hostRender(){
-  clearInterval(timer);
+  stop();
   app.className="wrap wide";
-  const n=ORDER.length,NQ=Q.length,KEY=NQ+1,L="ABCDEF";
+  const n=ORDER.length;
   if(hs===0){
     app.innerHTML=`${brand("Host screen")}
     <div class="memo"><div class="memo-head"><div>FROM: <b>Human Resources (not really)</b></div><div>TO: <b>Everyone on this call</b></div><div>RE: <b>Which corporate phrase are you?</b></div></div><div class="memo-body">
       <h1>Which corporate phrase are you?</h1>
-      <p class="lede">Grab a pen and paper, or the notes app on your phone. You'll see ${NQ} questions. For each one, write down the letter of your answer. Be honest. Nobody from HR is watching.</p>
-      <div class="row"><button id="nx">First question</button></div>
-      <p class="small">Host tip: open Zoom's Participants panel now, so you can see raised hands later. The space bar or right arrow moves to the next screen.</p>
-    </div></div>
-    <p class="small"><a href="#" id="toQuiz">Take the quiz on this device instead</a></p>`;
+      <p class="lede">Open the link in the chat on your phone or laptop. There are ${Q.length} questions and you get ${SECS} seconds for each. Remember your result, then come back to Zoom.</p>
+      <div class="clock" id="clk">3:00</div>
+      <div class="row"><button id="t">Start 3-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>
+      <p class="small">Host tip: paste the quiz link into the Zoom chat, and open the Participants panel so you can see raised hands. The space bar or right arrow moves to the next screen.</p>
+    </div></div>`;
+    $("#t").onclick=()=>{let s=180;$("#t").disabled=true;timer=setInterval(()=>{s--;$("#clk").textContent=`${s/60|0}:${String(s%60).padStart(2,"0")}`;if(s<=0){stop();$("#clk").textContent="Time!"}},1000)};
     $("#nx").onclick=()=>{hs=1;hostRender()};
-    $("#toQuiz").onclick=e=>{e.preventDefault();home()};
-  }else if(hs<=NQ){
-    const q=Q[hs-1];
-    app.innerHTML=`${brand(`Question ${hs} of ${NQ}`)}
-    <div class="progress"><i style="width:${(hs-1)/NQ*100}%"></i></div>
-    <div class="memo"><div class="memo-head"><div>RE: <b>${esc(q.re)}</b></div></div><div class="memo-body">
-      <h2>${esc(q.q)}</h2>
-      <div class="opts">${ORDER.map((k,i)=>`<div class="opt"><span class="k">${L[i]}</span><span>${esc(q.a[k])}</span></div>`).join("")}</div>
-      <div class="row" style="justify-content:space-between"><span class="clock" id="clk" style="font-size:2.4rem">20</span><div class="row"><button class="ghost" id="bk">Back</button><button id="nx">${hs<NQ?"Next question":"How to get your result"}</button></div></div>
-    </div></div>`;
-    let s=20;timer=setInterval(()=>{s--;$("#clk").textContent=s>0?s:"Write it down!";if(s<=0)clearInterval(timer)},1000);
-    $("#nx").onclick=()=>{hs++;hostRender()};
-    $("#bk").onclick=()=>{hs--;hostRender()};
-  }else if(hs===KEY){
-    app.innerHTML=`${brand("Your result")}
-    <div class="memo"><div class="memo-head"><div>RE: <b>Count your letters</b></div></div><div class="memo-body">
-      <h2>Which letter did you write down most often?</h2>
-      <div class="opts">${ORDER.map((k,i)=>`<div class="opt"><span class="k">Mostly ${L[i]}</span><span><b>${esc(R[k].name)}</b> · ${esc(R[k].tag)}</span></div>`).join("")}</div>
-      <p class="small">A tie? Pick the one that sounds most like you. Your colleagues may have opinions.</p>
-      <div class="row"><button class="ghost" id="bk">Back</button><button id="nx">Start the reveal</button></div>
-    </div></div>`;
-    $("#nx").onclick=()=>{hs++;hostRender()};
-    $("#bk").onclick=()=>{hs--;hostRender()};
-  }else if(hs<=KEY+n){
-    const k=ORDER[hs-KEY-1],r=R[k];
-    app.innerHTML=`${brand(`Reveal ${hs-KEY} of ${n}`)}
-    <div class="note"><span class="mono">Mostly ${L[hs-KEY-1]}? Raise your hand if you are</span><h1>${esc(r.name)}</h1><p style="font-weight:700;font-size:1.2rem">${esc(r.tag)}</p></div>
+  }else if(hs<=n){
+    const k=ORDER[hs-1],r=R[k];
+    app.innerHTML=`${brand(`Reveal ${hs} of ${n}`)}
+    <div class="note"><span class="mono">Raise your hand if you are</span><h1>${esc(r.name)}</h1><p style="font-weight:700;font-size:1.2rem">${esc(r.tag)}</p></div>
     <p style="font-size:1.15rem;max-width:62ch">${esc(r.desc)}</p>
     <div class="memo"><div class="memo-body">
-      <div class="count"><label for="cnt" class="mono">Hands raised</label><input id="cnt" type="number" min="0" inputmode="numeric" value="${counts[k]}"><button id="nx">${hs<KEY+n?"Next phrase":"Show the results"}</button></div>
+      <div class="count"><label for="cnt" class="mono">Hands raised</label><input id="cnt" type="number" min="0" inputmode="numeric" value="${counts[k]}"><button id="nx">${hs<n?"Next phrase":"Show the results"}</button></div>
       <p class="small">Read the number of raised hands from the Participants panel. Then click "Lower all hands" in Zoom before moving on.</p>
     </div></div>
     <div class="row"><button class="ghost" id="bk">Back</button></div>`;
@@ -257,30 +256,31 @@ function hostRender(){
     const rows=ORDER.map(k=>({k,n:Math.max(0,parseInt(counts[k],10)||0)})).sort((a,b)=>b.n-a.n);
     const max=Math.max(1,rows[0].n),total=rows.reduce((a,r)=>a+r.n,0);
     const top=rows.filter(r=>r.n===rows[0].n).map(r=>R[r.k].name);
-    const minN=Math.min(...rows.filter(r=>r.n>0).map(r=>r.n).concat(rows[0].n||0));
-    const rare=rows.filter(r=>r.n===minN&&r.n>0).map(r=>R[r.k].name);
+    const pos=rows.filter(r=>r.n>0),minN=pos.length?Math.min(...pos.map(r=>r.n)):0;
+    const rare=pos.filter(r=>r.n===minN).map(r=>R[r.k].name);
     app.innerHTML=`${brand("Final results")}
-    <h1>This company runs on ${esc(top.join(" and "))}.</h1>
+    <h1>${total?`This company runs on ${esc(top.join(" and "))}.`:"No hands counted yet."}</h1>
     <div class="memo"><div class="memo-head"><div>RE: <b>Results · ${total} people answered</b></div></div><div class="memo-body">
       <div class="bars">${rows.map(r=>`<div class="bar ${r.n===rows[0].n&&r.n>0?"top":""}"><span class="lbl">${esc(R[r.k].name)}</span><div class="track"><div class="fill" style="width:0" data-w="${r.n/max*100}"></div></div><span class="n">${r.n}</span></div>`).join("")}</div>
     </div></div>
     <div class="awards">
-      <div class="fact"><span class="mono">Most common</span><b>${esc(top.join(", "))}</b><br><span class="small">${esc(top.length===1?R[rows[0].k].tag:"A tie at the top")}</span></div>
+      <div class="fact"><span class="mono">Most common</span><b>${esc(total?top.join(", "):"Nobody yet")}</b><br><span class="small">${esc(top.length===1&&total?R[rows[0].k].tag:"A tie at the top")}</span></div>
       <div class="fact"><span class="mono">Rarest in the room</span><b>${esc(rare.join(", ")||"Nobody")}</b><br><span class="small">Unmute and defend yourself</span></div>
     </div>
     <div class="row"><button class="ghost" id="bk">Change the numbers</button><button class="ghost" id="rs">Start over</button></div>`;
     requestAnimationFrame(()=>app.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%"));
-    $("#bk").onclick=()=>{hs=KEY+n;hostRender()};
+    $("#bk").onclick=()=>{hs=n;hostRender()};
     $("#rs").onclick=host;
   }
 }
 document.addEventListener("keydown",e=>{
+  if(location.hash!=="#host")return;
   if((e.code==="Space"||e.key==="ArrowRight")&&document.activeElement.tagName!=="INPUT"){
     const nx=$("#nx");if(nx){e.preventDefault();document.activeElement.blur();nx.click()}
   }
 });
 location.hash==="#host"?host():home();
-addEventListener("hashchange",()=>{if(location.hash==="#host")host()});
+addEventListener("hashchange",()=>{location.hash==="#host"?host():home()});
 </script>
 
 </body>
