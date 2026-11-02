@@ -79,19 +79,15 @@ button:disabled{opacity:.4;cursor:default}
 .small{font-size:.9rem;color:var(--muted)}
 /* host */
 .clock{font-family:var(--f-mono);font-size:clamp(3rem,12vw,6.5rem);line-height:1;font-variant-numeric:tabular-nums;color:var(--accent)}
-.count{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.count{padding-top:8px;border-top:1px solid var(--line)}
-.count input{width:6rem;text-align:center;font:inherit;font-family:var(--f-mono);font-size:1.6rem;padding:8px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
-.bars{display:grid;gap:10px}
-.bar{display:grid;grid-template-columns:minmax(0,14rem) 1fr 3rem;gap:12px;align-items:center}
-.bar .lbl{font-weight:700;overflow-wrap:anywhere}
-.bar .track{height:30px;background:var(--line);border-radius:4px;overflow:hidden}
-.bar .fill{height:100%;background:var(--accent);border-radius:4px;transition:width .7s ease-out}
-.bar.top .fill{background:var(--note)}
-.bar .n{font-family:var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
-.awards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
-@media (max-width:520px){.bar{grid-template-columns:minmax(0,8rem) 1fr 2.4rem}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}.note{transform:none}}
+.six{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:22px 18px}
+.six .note{gap:6px;padding:20px 22px;min-width:0}
+.six .note:nth-child(even){transform:rotate(1deg)}
+.six .note h2{color:var(--on-note)}
+.six .note .pw{font-size:.95rem;margin-top:4px}
+.six .ph{border:2px dashed var(--line);border-radius:3px;display:grid;place-items:center;min-height:150px;font-family:var(--f-display);font-weight:900;font-size:3rem;color:var(--muted)}
+.ask{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+@media (prefers-reduced-motion:no-preference){.six .note.new{animation:stick .45s cubic-bezier(.2,1.4,.4,1)}@keyframes stick{from{transform:scale(.8) rotate(-6deg);opacity:0}}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}.note{transform:none!important}}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -214,8 +210,8 @@ function result(){
 }
 
 /* ---------- host ---------- */
-let hs=0,counts={};
-function host(){hs=0;counts={};ORDER.forEach(k=>counts[k]="");hostRender()}
+let hs=0;
+function host(){hs=0;hostRender()}
 function hostRender(){
   stop();
   app.className="wrap wide";
@@ -229,44 +225,22 @@ function hostRender(){
       <div class="row"><button id="t">Start 6-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>    </div></div>`;
     $("#t").onclick=()=>{let s=360;$("#t").disabled=true;timer=setInterval(()=>{s--;$("#clk").textContent=`${s/60|0}:${String(s%60).padStart(2,"0")}`;if(s<=0){stop();$("#clk").textContent="Time!"}},1000)};
     $("#nx").onclick=()=>{hs=1;hostRender()};
-  }else if(hs<=n){
-    const k=ORDER[hs-1],r=R[k];
-    app.innerHTML=`${brand(`Reveal ${hs} of ${n}`)}
-    <div class="note"><span class="mono">Raise your hand if you are</span><h1>${esc(r.name)}</h1><p style="font-weight:700;font-size:1.2rem">${esc(r.tag)}</p></div>
-    <p style="font-size:1.15rem;max-width:62ch">${esc(r.desc)}</p>
-    <div class="count">
-      <input id="cnt" type="number" min="0" inputmode="numeric" placeholder="0" aria-label="Number of hands" value="${counts[k]}"><span style="font-size:1.2rem">hands up</span>
-      <span style="flex:1"></span>
-      <button class="ghost" id="bk">Back</button><button id="nx">${hs<n?"Next":"Show results"}</button>
-    </div>`;
-    $("#cnt").focus();
-    $("#cnt").onkeydown=e=>{if(e.key==="Enter")$("#nx").click()};
-    $("#nx").onclick=()=>{counts[k]=$("#cnt").value;hs++;hostRender()};
-    $("#bk").onclick=()=>{counts[k]=$("#cnt").value;hs--;hostRender()};
   }else{
-    const rows=ORDER.map(k=>({k,n:Math.max(0,parseInt(counts[k],10)||0)})).sort((a,b)=>b.n-a.n);
-    const max=Math.max(1,rows[0].n),total=rows.reduce((a,r)=>a+r.n,0);
-    const top=rows.filter(r=>r.n===rows[0].n).map(r=>R[r.k].name);
-    const pos=rows.filter(r=>r.n>0),minN=pos.length?Math.min(...pos.map(r=>r.n)):0;
-    const rare=pos.filter(r=>r.n===minN).map(r=>R[r.k].name);
-    app.innerHTML=`${brand("Final results")}
-    <h1>${total?`This company runs on ${esc(top.join(" and "))}.`:"No hands counted yet."}</h1>
-    <div class="memo"><div class="memo-head"><div>RE: <b>Results · ${total} people answered</b></div></div><div class="memo-body">
-      <div class="bars">${rows.map(r=>`<div class="bar ${r.n===rows[0].n&&r.n>0?"top":""}"><span class="lbl">${esc(R[r.k].name)}</span><div class="track"><div class="fill" style="width:0" data-w="${r.n/max*100}"></div></div><span class="n">${r.n}</span></div>`).join("")}</div>
-    </div></div>
-    <div class="awards">
-      <div class="fact"><span class="mono">Most common</span><b>${esc(total?top.join(", "):"Nobody yet")}</b><br><span class="small">${esc(top.length===1&&total?R[rows[0].k].tag:"A tie at the top")}</span></div>
-      <div class="fact"><span class="mono">Rarest in the room</span><b>${esc(rare.join(", ")||"Nobody")}</b><br><span class="small">Unmute and defend yourself</span></div>
-    </div>
-    <div class="row"><button class="ghost" id="bk">Change the numbers</button><button class="ghost" id="rs">Start over</button></div>`;
-    requestAnimationFrame(()=>app.querySelectorAll(".fill").forEach(f=>f.style.width=f.dataset.w+"%"));
-    $("#bk").onclick=()=>{hs=n;hostRender()};
-    $("#rs").onclick=host;
+    const done=hs>n;
+    const shown=Math.min(hs,n);
+    app.innerHTML=`${brand(done?"Poll time":`Reveal ${shown} of ${n}`)}
+    <h1>${done?"Which one are you? Vote in the poll.":"What you could have been"}</h1>
+    <div class="six">${ORDER.map((k,i)=>i<shown
+      ?`<div class="note ${i===shown-1&&!done?"new":""}"><h2>${esc(R[k].name)}</h2><b>${esc(R[k].tag)}</b><span class="pw">Superpower: ${esc(R[k].power)}</span></div>`
+      :`<div class="ph">?</div>`).join("")}</div>
+    <div class="ask"><button class="ghost" id="bk">Back</button>${done?"":`<button id="nx">${shown<n?"Reveal next":"Done"}</button>`}</div>`;
+    if(!done)$("#nx").onclick=()=>{hs++;hostRender()};
+    $("#bk").onclick=()=>{hs--;hostRender()};
   }
 }
 document.addEventListener("keydown",e=>{
   if(location.hash!=="#host")return;
-  if((e.code==="Space"||e.key==="ArrowRight")&&document.activeElement.tagName!=="INPUT"){
+  if(e.code==="Space"||e.key==="ArrowRight"){
     const nx=$("#nx");if(nx){e.preventDefault();document.activeElement.blur();nx.click()}
   }
 });
