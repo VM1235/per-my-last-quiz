@@ -80,7 +80,8 @@ button:disabled{opacity:.4;cursor:default}
 /* host */
 .clock{font-family:var(--f-mono);font-size:clamp(3rem,12vw,6.5rem);line-height:1;font-variant-numeric:tabular-nums;color:var(--accent)}
 .count{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.count input{width:7rem;font:inherit;font-family:var(--f-mono);font-size:1.6rem;padding:8px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
+.count{padding-top:8px;border-top:1px solid var(--line)}
+.count input{width:6rem;text-align:center;font:inherit;font-family:var(--f-mono);font-size:1.6rem;padding:8px 12px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
 .bars{display:grid;gap:10px}
 .bar{display:grid;grid-template-columns:minmax(0,14rem) 1fr 3rem;gap:12px;align-items:center}
 .bar .lbl{font-weight:700;overflow-wrap:anywhere}
@@ -143,7 +144,7 @@ const Q=[
   pml:"\"I do have a hard stop at four.\" (It is 4:01.)",cb:"\"Let's park this and circle back.\"",syn:"\"Great discussion, everyone!\"",
   off:"\"Shall a few of us pick this up separately?\"",qw:"\"So what's the next step, and who owns it?\"",box:"\"Wait, before we go, one more idea...\""}}
 ];
-const SECS=15;
+const SECS=25;
 const $=s=>document.querySelector(s);
 const app=$("#app");
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -162,7 +163,7 @@ function home(){
   <div class="memo-body">
     <h1>Which corporate phrase are you?</h1>
     <p class="lede">Eight questions about meetings, emails and Friday afternoons. You get ${SECS} seconds for each one, so go with your gut. At the end, you find out which phrase you really are.</p>
-    <div class="row"><button id="begin">Start the quiz</button><span class="small">About 2 minutes</span></div>
+    <div class="row"><button id="begin">Start the quiz</button><span class="small">About 3 minutes</span></div>
   </div></div>`;
   $("#begin").onclick=()=>{qi=0;picks=[];orders=Q.map(()=>shuffle(ORDER));question()};
 }
@@ -224,20 +225,20 @@ function hostRender(){
     <div class="memo"><div class="memo-body">
       <h1>Which corporate phrase are you?</h1>
       <p class="lede">Open the link in the chat on your phone or laptop. There are ${Q.length} questions and you get ${SECS} seconds for each. Remember your result, then come back to Zoom.</p>
-      <div class="clock" id="clk">3:00</div>
-      <div class="row"><button id="t">Start 3-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>    </div></div>`;
-    $("#t").onclick=()=>{let s=180;$("#t").disabled=true;timer=setInterval(()=>{s--;$("#clk").textContent=`${s/60|0}:${String(s%60).padStart(2,"0")}`;if(s<=0){stop();$("#clk").textContent="Time!"}},1000)};
+      <div class="clock" id="clk">4:00</div>
+      <div class="row"><button id="t">Start 4-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>    </div></div>`;
+    $("#t").onclick=()=>{let s=240;$("#t").disabled=true;timer=setInterval(()=>{s--;$("#clk").textContent=`${s/60|0}:${String(s%60).padStart(2,"0")}`;if(s<=0){stop();$("#clk").textContent="Time!"}},1000)};
     $("#nx").onclick=()=>{hs=1;hostRender()};
   }else if(hs<=n){
     const k=ORDER[hs-1],r=R[k];
     app.innerHTML=`${brand(`Reveal ${hs} of ${n}`)}
     <div class="note"><span class="mono">Raise your hand if you are</span><h1>${esc(r.name)}</h1><p style="font-weight:700;font-size:1.2rem">${esc(r.tag)}</p></div>
     <p style="font-size:1.15rem;max-width:62ch">${esc(r.desc)}</p>
-    <div class="memo"><div class="memo-body">
-      <div class="count"><label for="cnt" class="mono">Hands raised</label><input id="cnt" type="number" min="0" inputmode="numeric" value="${counts[k]}"><button id="nx">${hs<n?"Next phrase":"Show the results"}</button></div>
-      <p class="small">Read the number of raised hands from the Participants panel. Then click "Lower all hands" in Zoom before moving on.</p>
-    </div></div>
-    <div class="row"><button class="ghost" id="bk">Back</button></div>`;
+    <div class="count">
+      <input id="cnt" type="number" min="0" inputmode="numeric" placeholder="0" aria-label="Number of hands" value="${counts[k]}"><span style="font-size:1.2rem">hands up</span>
+      <span style="flex:1"></span>
+      <button class="ghost" id="bk">Back</button><button id="nx">${hs<n?"Next":"Show results"}</button>
+    </div>`;
     $("#cnt").focus();
     $("#cnt").onkeydown=e=>{if(e.key==="Enter")$("#nx").click()};
     $("#nx").onclick=()=>{counts[k]=$("#cnt").value;hs++;hostRender()};
