@@ -123,7 +123,7 @@ const Q=[
   pml:"\"Sure, what's it about?\"",cb:"\"In a meeting, can we talk after lunch?\"",syn:"\"Always! Want me to loop in anyone else?\"",
   off:"\"Let's just jump on a call.\"",qw:"\"Yes, send it over.\" Sorted in two messages.",box:"\"Is this about the new idea? Tell me everything.\""}},
  {re:"Camera etiquette",q:"Your camera is off in a team meeting. Why?",a:{
-  pml:"The invite didn't mention video",cb:"I'll turn it on in a minute. (You won't.)",syn:"It isn't. My camera is always on.",
+  pml:"The invite didn't mention video",cb:"I'll turn it on once I've settled in",syn:"It isn't. My camera is always on.",
   off:"I'll turn it on when I need to speak",qw:"I'm clearing emails while I listen",box:"I'm walking. I think better on the move."}},
  {re:"Inbox status",q:"Your inbox right now looks like:",a:{
   pml:"Neat folders, with a rule for everything",cb:"2,317 unread. They can wait.",syn:"Lots of threads I'm cc'd on, and I read them all",
@@ -199,7 +199,8 @@ function score(p){
 }
 function result(){
   stop();
-  const r=R[score(picks)||"cb"];
+  // nobody answered anything in time: pick any phrase at random so none is favoured
+  const r=R[score(picks)||ORDER[Math.random()*ORDER.length|0]];
   app.className="wrap";
   app.innerHTML=`${brand("Your result")}
   <div class="note"><span class="mono">Your corporate phrase is</span><h1>${esc(r.name)}</h1><p style="font-weight:700;font-size:1.15rem">${esc(r.tag)}</p></div>
