@@ -221,8 +221,8 @@ function hostRender(){
   }else{
     const done=hs>n;
     const shown=Math.min(hs,n);
-    app.innerHTML=`${brand(done?"Poll time":`Reveal ${shown} of ${n}`)}
-    <h1>${done?"Which one are you? Vote in the poll.":"What you could have been"}</h1>
+    app.innerHTML=`${brand(done?"All six":`Reveal ${shown} of ${n}`)}
+    <h1>${done?"Which one are you?":"What you could have been"}</h1>
     <div class="six">${ORDER.map((k,i)=>i<shown
       ?`<div class="note ${i===shown-1&&!done?"new":""}"><span class="num">${i+1}</span><h2>${esc(R[k].name)}</h2><b>${esc(R[k].tag)}</b><span class="pw">Superpower: ${esc(R[k].power)}</span></div>`
       :`<div class="ph">${i+1}</div>`).join("")}</div>
