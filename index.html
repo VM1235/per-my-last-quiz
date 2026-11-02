@@ -158,7 +158,7 @@ function home(){
   stop();
   app.className="wrap";
   app.innerHTML=`${brand()}
-  <div class="memo"><div class="memo-head"><div>FROM: <b>Human Resources (not really)</b></div><div>TO: <b>Everyone on this call</b></div><div>RE: <b>Which corporate phrase are you?</b></div></div>
+  <div class="memo">
   <div class="memo-body">
     <h1>Which corporate phrase are you?</h1>
     <p class="lede">Eight questions about meetings, emails and Friday afternoons. You get ${SECS} seconds for each one, so go with your gut. At the end, you find out which phrase you really are.</p>
@@ -201,22 +201,14 @@ function score(p){
 }
 function result(){
   stop();
-  let k=score(picks),extra="";
-  const missed=picks.filter(x=>!x).length;
-  if(!k){k="cb";extra=`<p class="small">You didn't answer a single question in time. That tells us everything we need to know.</p>`}
-  else if(missed)extra=`<p class="small">You ran out of time on ${missed} question${missed>1?"s":""}. We've noted it for your review.</p>`;
-  const r=R[k];
+  const r=R[score(picks)||"cb"];
   app.className="wrap";
   app.innerHTML=`${brand("Your result")}
   <div class="note"><span class="mono">Your corporate phrase is</span><h1>${esc(r.name)}</h1><p style="font-weight:700;font-size:1.15rem">${esc(r.tag)}</p></div>
-  <p style="font-size:1.1rem;max-width:62ch">${esc(r.desc)}</p>
-  ${extra}
   <div class="facts">
     <div class="fact"><span class="mono">Superpower</span>${esc(r.power)}</div>
-    <div class="fact"><span class="mono">Kryptonite</span>${esc(r.kryp)}</div>
     <div class="fact"><span class="mono">Natural habitat</span>${esc(r.habitat)}</div>
-  </div>
-  <div class="chat"><span class="mono">Now go back to Zoom</span><p>Remember your phrase. When the host calls out <b>${esc(r.name)}</b>, raise your hand.</p></div>`;
+  </div>`;
   window.scrollTo(0,0);
 }
 
@@ -229,13 +221,11 @@ function hostRender(){
   const n=ORDER.length;
   if(hs===0){
     app.innerHTML=`${brand("Host screen")}
-    <div class="memo"><div class="memo-head"><div>FROM: <b>Human Resources (not really)</b></div><div>TO: <b>Everyone on this call</b></div><div>RE: <b>Which corporate phrase are you?</b></div></div><div class="memo-body">
+    <div class="memo"><div class="memo-body">
       <h1>Which corporate phrase are you?</h1>
       <p class="lede">Open the link in the chat on your phone or laptop. There are ${Q.length} questions and you get ${SECS} seconds for each. Remember your result, then come back to Zoom.</p>
       <div class="clock" id="clk">3:00</div>
-      <div class="row"><button id="t">Start 3-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>
-      <p class="small">Host tip: paste the quiz link into the Zoom chat, and open the Participants panel so you can see raised hands. The space bar or right arrow moves to the next screen.</p>
-    </div></div>`;
+      <div class="row"><button id="t">Start 3-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>    </div></div>`;
     $("#t").onclick=()=>{let s=180;$("#t").disabled=true;timer=setInterval(()=>{s--;$("#clk").textContent=`${s/60|0}:${String(s%60).padStart(2,"0")}`;if(s<=0){stop();$("#clk").textContent="Time!"}},1000)};
     $("#nx").onclick=()=>{hs=1;hostRender()};
   }else if(hs<=n){
