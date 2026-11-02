@@ -116,23 +116,24 @@ const R={
 };
 const ORDER=["pml","cb","syn","off","qw","box"];
 const Q=[
- {re:"Snack order",q:"Pick a snack for a long meeting:",a:{
-  pml:"Neatly cut fruit",cb:"Biscuits, saved for later",syn:"Samosas for everyone",
-  off:"A quiet cup of tea",qw:"A banana",box:"Something I've never tried"}},
- {re:"Desk setup",q:"Pick one thing for your desk:",a:{
-  pml:"Labelled folders",cb:"A comfy cushion",syn:"A team photo",
-  off:"Good headphones",qw:"A big clock",box:"A whiteboard"}},
- {re:"Weekend plans",q:"Pick a Saturday:",a:{
-  pml:"A planned day out",cb:"Nothing planned at all",syn:"A big family lunch",
-  off:"Coffee with one close friend",qw:"Fixing things around the house",box:"Trying a new hobby"}},
- {re:"Leave request",q:"Pick a holiday:",a:{
-  pml:"A fully planned tour",cb:"A slow week on a beach",syn:"A group trip with friends",
-  off:"A quiet cabin in the hills",qw:"A quick city break",box:"Somewhere I've never heard of"}},
- {re:"Skills assessment",q:"Pick a superpower:",a:{
-  pml:"A perfect memory",cb:"Pausing time",syn:"Speaking every language",
-  off:"Reading minds",qw:"Super speed",box:"Seeing the future"}}
+ {re:"Quick sync (15 min)",q:"A meeting invite arrives: \"Quick sync, 15 minutes.\" There's no agenda. You:",a:{
+  pml:"Reply asking what it's about before accepting",cb:"Accept, then ask if it can move to next week",syn:"Accept and add two people who should probably be there",
+  off:"Message the organiser to ask what's going on",qw:"Accept, and hope it really is 15 minutes",box:"Accept and bring a few ideas, just in case"}},
+ {re:"Chat message",q:"A colleague messages you: \"Got a minute?\" You reply:",a:{
+  pml:"\"Sure, what's it about?\"",cb:"\"In a meeting, can we talk after lunch?\"",syn:"\"Always! Want me to loop in anyone else?\"",
+  off:"\"Let's just jump on a call.\"",qw:"\"Yes, send it over.\" Sorted in two messages.",box:"\"Is this about the new idea? Tell me everything.\""}},
+ {re:"Inbox status",q:"Your inbox right now looks like:",a:{
+  pml:"Neat folders, with a rule for everything",cb:"2,317 unread. They can wait.",syn:"Lots of threads I'm cc'd on, and I read them all",
+  off:"Not much, because I'd rather talk than email",qw:"Inbox zero, every single day",box:"Newsletters and articles I saved for inspiration"}},
+ {re:"Friday, 4:45 pm",q:"It's Friday at 4:45 pm. You are:",a:{
+  pml:"Sending a tidy summary of everything that happened this week",cb:"Moving three tasks to Monday",syn:"Organising drinks for the whole team",
+  off:"Having a quiet catch-up with your favourite colleague",qw:"Already logged off. You finished at 3.",box:"Starting a brand-new project nobody asked for"}},
+ {re:"This meeting is overrunning",q:"The meeting is 10 minutes over. You say:",a:{
+  pml:"\"I do have a hard stop at four.\" (It is 4:01.)",cb:"\"Let's park this and circle back.\"",syn:"\"Great discussion, everyone!\"",
+  off:"\"Shall a few of us pick this up separately?\"",qw:"\"So what's the next step, and who owns it?\"",box:"\"Wait, before we go, one more idea...\""}}
 ];
 const SECS=40;
+const SHOW=4;  // options shown per question: a random 4 of the 6, drawn fresh for each player
 const $=s=>document.querySelector(s);
 const app=$("#app");
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -150,10 +151,10 @@ function home(){
   <div class="memo">
   <div class="memo-body">
     <h1>Which corporate phrase are you?</h1>
-    <p class="lede">Five quick picks. No right or wrong answers. You get ${SECS} seconds for each one, so go with your gut. At the end, you find out which phrase you really are.</p>
+    <p class="lede">Five quick questions about office life. You get ${SECS} seconds for each one, so go with your gut. At the end, you find out which phrase you really are.</p>
     <div class="row"><button id="begin">Start the quiz</button><span class="small">About 3 minutes</span></div>
   </div></div>`;
-  $("#begin").onclick=()=>{qi=0;picks=[];orders=Q.map(()=>shuffle(ORDER));question()};
+  $("#begin").onclick=()=>{qi=0;picks=[];orders=Q.map(()=>shuffle(ORDER).slice(0,SHOW));question()};
 }
 function question(){
   stop();
