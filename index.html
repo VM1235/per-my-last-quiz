@@ -144,7 +144,7 @@ const Q=[
   pml:"\"I do have a hard stop at four.\" (It is 4:01.)",cb:"\"Let's park this and circle back.\"",syn:"\"Great discussion, everyone!\"",
   off:"\"Shall a few of us pick this up separately?\"",qw:"\"So what's the next step, and who owns it?\"",box:"\"Wait, before we go, one more idea...\""}}
 ];
-const SECS=25;
+const SECS=40;
 const $=s=>document.querySelector(s);
 const app=$("#app");
 const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
@@ -163,7 +163,7 @@ function home(){
   <div class="memo-body">
     <h1>Which corporate phrase are you?</h1>
     <p class="lede">Eight questions about meetings, emails and Friday afternoons. You get ${SECS} seconds for each one, so go with your gut. At the end, you find out which phrase you really are.</p>
-    <div class="row"><button id="begin">Start the quiz</button><span class="small">About 3 minutes</span></div>
+    <div class="row"><button id="begin">Start the quiz</button><span class="small">About 5 minutes</span></div>
   </div></div>`;
   $("#begin").onclick=()=>{qi=0;picks=[];orders=Q.map(()=>shuffle(ORDER));question()};
 }
@@ -225,9 +225,9 @@ function hostRender(){
     <div class="memo"><div class="memo-body">
       <h1>Which corporate phrase are you?</h1>
       <p class="lede">Open the link in the chat on your phone or laptop. There are ${Q.length} questions and you get ${SECS} seconds for each. Remember your result, then come back to Zoom.</p>
-      <div class="clock" id="clk">4:00</div>
-      <div class="row"><button id="t">Start 4-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>    </div></div>`;
-    $("#t").onclick=()=>{let s=240;$("#t").disabled=true;timer=setInterval(()=>{s--;$("#clk").textContent=`${s/60|0}:${String(s%60).padStart(2,"0")}`;if(s<=0){stop();$("#clk").textContent="Time!"}},1000)};
+      <div class="clock" id="clk">6:00</div>
+      <div class="row"><button id="t">Start 6-minute timer</button><button class="ghost" id="nx">Start the reveal</button></div>    </div></div>`;
+    $("#t").onclick=()=>{let s=360;$("#t").disabled=true;timer=setInterval(()=>{s--;$("#clk").textContent=`${s/60|0}:${String(s%60).padStart(2,"0")}`;if(s<=0){stop();$("#clk").textContent="Time!"}},1000)};
     $("#nx").onclick=()=>{hs=1;hostRender()};
   }else if(hs<=n){
     const k=ORDER[hs-1],r=R[k];
