@@ -155,7 +155,7 @@ function home(){
   <div class="memo"><div class="memo-head"><div>FROM: <b>Human Resources (not really)</b></div><div>TO: <b>Everyone on this call</b></div><div>RE: <b>Which corporate phrase are you?</b></div></div>
   <div class="memo-body">
     <h1>Which corporate phrase are you?</h1>
-    <p class="lede">Eight questions about meetings, emails and the office kitchen. Answer honestly. Nobody from HR is watching. At the end, you find out which phrase you really are.</p>
+    <p class="lede">Eight questions about meetings, emails and Friday afternoons. Answer honestly. Nobody from HR is watching. At the end, you find out which phrase you really are.</p>
     <div class="row"><button id="hostlink">Present it on a call</button><button class="ghost" id="begin">Take it on this device</button></div>
   </div></div>`;
   $("#begin").onclick=()=>{qi=0;picks=[];orders=Q.map(()=>shuffle(ORDER));question()};
@@ -280,6 +280,7 @@ document.addEventListener("keydown",e=>{
   }
 });
 location.hash==="#host"?host():home();
+addEventListener("hashchange",()=>{if(location.hash==="#host")host()});
 </script>
 
 </body>
